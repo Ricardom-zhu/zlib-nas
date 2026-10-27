@@ -107,6 +107,22 @@ All endpoints are plain JSON under `/api`. Interactive docs: `/api/docs`.
 | `GET` | `/api/cover?u=<url>` | Server-side cover proxy |
 | `GET` | `/api/export` | Full JSON dump of the database |
 
+## Being a good guest
+
+The mirror is somebody else's server, usually paid for by donations and shared with
+everyone else on that domain, so this project treats it as a scarce resource:
+
+- account and quota are cached for two minutes, so a dashboard left open does not
+  turn into a request stream; only the refresh button bypasses the cache
+- covers are cached on disk after the first fetch
+- the browser polls every thirty seconds, and not at all in a background tab
+- downloads are serialised by default, and the queue stops when the daily
+  allowance runs out instead of retrying into a wall of errors
+- browsing the wishlist costs no quota at all; only the download itself does
+
+If you fork this and raise the concurrency or shorten the cache, you are the reason
+a mirror starts rate-limiting its users.
+
 ## Security notes
 
 This is a **LAN tool**. Read these before exposing it anywhere:

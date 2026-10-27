@@ -161,7 +161,10 @@ function renderQuota() {
 /* -------------------------------------------------------------------- books */
 
 function bookCard(book) {
-  const cover = book.cover
+  // The mirror sometimes reports a relative placeholder path instead of a URL;
+  // asking the proxy for it would only produce a 400 on every render.
+  const remote = /^https?:/i.test(book.cover || "");
+  const cover = remote
     ? `<img class="cover" loading="lazy" src="/api/cover?u=${encodeURIComponent(book.cover)}" alt="">`
     : `<div class="cover placeholder">${BOOK_ICON}</div>`;
   const known = state.owned.get(`${book.id}:${book.hash}`) || state.owned.get(book.sha256);
@@ -187,6 +190,44 @@ function bookCard(book) {
         </div>
       </div>
     </div>`;
+}
+
+/* Mark fetched / queued books in place.
+   Rebuilding the grid on every poll used to re-create every <img>, which made the
+   browser fetch the whole shelf of covers again — the mirror and its CDN should
+   not see that traffic just because a tab is open. */
+function updateOwnedBadges() {
+  document.querySelectorAll("[data-download]").forEach((button) => {
+    const key = `${button.dataset.download}:${button.dataset.hash}`;
+    const status = state.owned.get(key);
+    const card = button.closest(".card-book");
+    if (!card) return;
+    const actions = button.parentNode;
+    const done = status === "done";
+    const queued = !!status && !done;
+
+    let badge = card.querySelector(".badge.owned");
+    if (done && !badge) {
+      badge = document.createElement("span");
+      badge.className = "badge owned";
+      badge.textContent = t("owned");
+      actions.insertBefore(badge, button);
+    } else if (!done && badge) {
+      badge.remove();
+    }
+
+    let pending = card.querySelector(".badge.queued");
+    if (queued && !pending) {
+      pending = document.createElement("span");
+      pending.className = "badge queued";
+      pending.textContent = t("in_queue");
+      actions.insertBefore(pending, button);
+    } else if (!queued && pending) {
+      pending.remove();
+    }
+
+    button.disabled = !!status;
+  });
 }
 
 function renderSaved() {
@@ -285,9 +326,9 @@ function renderLibrary(files) {
 
 /* --------------------------------------------------------------------- data */
 
-async function refreshStatus() {
+async function refreshStatus(fresh = false) {
   try {
-    state.status = await api("/api/status");
+    state.status = await api(`/api/status${fresh ? "?fresh=1" : ""}`);
   } catch (error) {
     state.status = { configured: false, error: error.message };
   }
@@ -314,9 +355,7 @@ async function refreshDownloads() {
   });
   state.owned = owned;
   renderDownloads(records);
-  // The wishlist shows a badge for books already fetched, so it has to be
-  // re-drawn once we know which ones those are.
-  renderSaved();
+  updateOwnedBadges();
 }
 
 async function refreshLibrary() {
@@ -415,7 +454,10 @@ document.addEventListener("click", (event) => {
   }
 });
 
-$("btnRefresh").onclick = () => { refreshStatus(); if ($("panel-saved").classList.contains("active")) refreshSaved(); };
+$("btnRefresh").onclick = () => {
+  refreshStatus(true);  // the one place that bypasses the server-side cache
+  if ($("panel-saved").classList.contains("active")) refreshSaved();
+};
 $("btnLang").onclick = () => {
   state.lang = state.lang === "zh" ? "en" : "zh";
   localStorage.setItem("zl-lang", state.lang);
@@ -475,7 +517,10 @@ $("btnLogout").onclick = async () => {
   try { await refreshDownloads(); } catch (error) { /* ignore */ }
   // Keep the quota and the queue live without a manual refresh.
   state.pollTimer = setInterval(() => {
+    // Nothing to poll in a background tab, and every poll costs a request to the
+    // mirror once the server-side cache has expired.
+    if (document.hidden) return;
     refreshStatus();
     if ($("panel-downloads").classList.contains("active")) refreshDownloads();
-  }, 8000);
+  }, 30000);
 })();

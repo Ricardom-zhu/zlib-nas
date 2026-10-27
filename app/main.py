@@ -12,9 +12,11 @@ its own — put it behind your LAN, not the internet.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import shutil
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -29,12 +31,37 @@ from .store import Store
 from .zlibrary import ZlibClient, ZlibError
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
+COVER_CACHE_DIR = Path(config.DATA_DIR) / "covers"
+COVER_HEADERS = {"Cache-Control": "public, max-age=604800"}
 
 config.ensure_dirs()
 store = Store()
 queue_manager = DownloadQueue(store, lambda: get_client())
 
 app = FastAPI(title="zlib-nas", version="1.0.0", docs_url="/api/docs", openapi_url="/api/openapi.json")
+
+
+# The mirror is a shared community resource and the browser polls for status, so
+# account and quota are cached instead of fetched on every poll: a dashboard left
+# open must not turn into a steady stream of requests from one IP.
+ACCOUNT_TTL = 120.0
+_account_cache: Dict[str, Any] = {"at": 0.0, "account": None, "quota": None}
+
+
+def invalidate_account() -> None:
+    """Drop the cached snapshot, e.g. after login or a queue change."""
+    _account_cache["at"] = 0.0
+
+
+def account_snapshot(fresh: bool = False) -> Dict[str, Any]:
+    now = time.monotonic()
+    if not fresh and _account_cache["at"] and now - _account_cache["at"] < ACCOUNT_TTL:
+        return dict(_account_cache)
+    client = require_client()
+    account = client.account()
+    quota = client.quota()
+    _account_cache.update(at=now, account=account, quota=quota)
+    return dict(_account_cache)
 
 
 # --------------------------------------------------------------------- session
@@ -145,7 +172,7 @@ def require_client() -> ZlibClient:
 
 
 @app.get("/api/status")
-def api_status() -> Dict[str, Any]:
+def api_status(fresh: bool = False) -> Dict[str, Any]:
     payload: Dict[str, Any] = {
         "configured": session_configured(),
         "domain": load_session().get("domain") or config.ZLIB_DOMAIN,
@@ -160,9 +187,9 @@ def api_status() -> Dict[str, Any]:
         return payload
 
     try:
-        client = require_client()
-        payload["account"] = client.account()
-        payload["quota"] = client.quota()
+        snapshot = account_snapshot(fresh=fresh)
+        payload["account"] = snapshot["account"]
+        payload["quota"] = snapshot["quota"]
     except HTTPException as exc:
         # A status call must never fail outright: report it in the body instead.
         payload["error"] = exc.detail
@@ -195,12 +222,14 @@ def api_login(payload: LoginPayload) -> Dict[str, Any]:
         raise HTTPException(status_code=401, detail=f"session rejected: {exc}") from exc
 
     save_session({"domain": client.domain, "cookies": client.cookies()})
+    invalidate_account()
     return {"ok": True, "account": account}
 
 
 @app.post("/api/logout")
 def api_logout() -> Dict[str, Any]:
     clear_session()
+    invalidate_account()
     return {"ok": True}
 
 
@@ -267,6 +296,7 @@ def api_download(payload: DownloadPayload) -> Dict[str, Any]:
         }
     )
     queue_manager.enqueue(download_id)
+    invalidate_account()  # the allowance is about to change
     return {"ok": True, "download_id": download_id}
 
 
@@ -280,6 +310,7 @@ def api_retry(download_id: int) -> Dict[str, Any]:
     if not store.get_download(download_id):
         raise HTTPException(status_code=404, detail="not found")
     queue_manager.retry(download_id)
+    invalidate_account()
     return {"ok": True}
 
 
@@ -321,19 +352,33 @@ def api_library_file(name: str):
 
 @app.get("/api/cover")
 def api_cover(u: str = "") -> Response:
-    """Proxy cover images.
+    """Proxy and cache cover images.
 
-    Cover URLs point at a CDN that may be unreachable from the NAS even when
-    the mirror itself works, so they are fetched server-side.
+    Cover URLs point at a CDN that may be unreachable from the NAS even when the
+    mirror itself works, so they are fetched server-side and kept on disk. The
+    cache matters for politeness: re-rendering a shelf must not re-fetch every
+    cover from the CDN.
     """
     if not u.startswith(("https://", "http://")):
         raise HTTPException(status_code=400, detail="invalid url")
+
+    COVER_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    blob = COVER_CACHE_DIR / hashlib.sha1(u.encode("utf-8")).hexdigest()
+    meta = blob.with_suffix(".json")
+    if blob.exists() and meta.exists():
+        try:
+            media_type = json.loads(meta.read_text(encoding="utf-8"))["type"]
+            return Response(blob.read_bytes(), media_type=media_type, headers=COVER_HEADERS)
+        except (OSError, ValueError, KeyError):
+            pass
+
     content, media_type = _guard(require_client().fetch_bytes, u)
-    return Response(
-        content=content,
-        media_type=media_type,
-        headers={"Cache-Control": "public, max-age=604800"},
-    )
+    try:
+        blob.write_bytes(content)
+        meta.write_text(json.dumps({"type": media_type, "url": u}), encoding="utf-8")
+    except OSError:
+        pass
+    return Response(content=content, media_type=media_type, headers=COVER_HEADERS)
 
 
 @app.get("/api/export")
