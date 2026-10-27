@@ -1,0 +1,28 @@
+services:
+  zlib-nas:
+    build:
+      context: .
+      args:
+        # Set PIP_INDEX_URL in .env if pypi.org is slow from your network.
+        PIP_INDEX_URL: ${PIP_INDEX_URL:-https://pypi.org/simple}
+    image: zlib-nas:local
+    container_name: zlib-nas
+    ports:
+      - "8101:8000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      # Z-Library mirror domain, no scheme. Set it in the UI if you prefer.
+      - ZLIB_DOMAIN=${ZLIB_DOMAIN:-}
+      # Optional: sign in automatically. The password is never stored.
+      - ZLIB_EMAIL=${ZLIB_EMAIL:-}
+      - ZLIB_PASSWORD=${ZLIB_PASSWORD:-}
+      # Optional HTTP proxy for both the mirror and the file CDN.
+      - PROXY=${PROXY:-}
+      # Optional: symlink finished downloads into another folder (e.g. a
+      # library that your book manager scans).
+      - MIRROR_DIR=${MIRROR_DIR:-}
+      # Stop the queue once this many downloads remain in the daily allowance.
+      - QUOTA_RESERVE=${QUOTA_RESERVE:-0}
+      - MAX_CONCURRENT=${MAX_CONCURRENT:-1}
+    restart: unless-stopped

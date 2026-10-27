@@ -1,0 +1,21 @@
+# local data and secrets — never commit these
+data/
+.env
+*.db
+*.db-wal
+*.db-shm
+session.json
+export.json
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# editors / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp

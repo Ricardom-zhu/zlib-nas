@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>zlib-nas</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+           stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19a1 1 0 0 1 1 1v13.5"/>
+        <path d="M4 4.5V19a2 2 0 0 0 2 2h14"/>
+        <path d="M8 7h8M8 11h6"/>
+      </svg>
+    </span>
+    <span>zlib-nas</span>
+  </div>
+
+  <div class="quota" id="quota" title="Daily download allowance">
+    <div class="quota-bar"><div class="quota-fill" id="quotaFill"></div></div>
+    <span class="quota-text" id="quotaText">—</span>
+  </div>
+
+  <div class="topbar-actions">
+    <span class="account" id="account"></span>
+    <button class="btn ghost" id="btnLang">EN</button>
+    <button class="btn ghost" id="btnRefresh" title="Refresh">⟳</button>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="saved" i18n="tab_saved">收藏</button>
+  <button class="tab" data-tab="search" i18n="tab_search">搜索</button>
+  <button class="tab" data-tab="downloads" i18n="tab_downloads">下载</button>
+  <button class="tab" data-tab="library" i18n="tab_library">本地库</button>
+  <button class="tab" data-tab="settings" i18n="tab_settings">设置</button>
+</nav>
+
+<main>
+
+  <!-- ---------------------------------------------------------- wishlist -->
+  <section class="panel active" id="panel-saved">
+    <div class="toolbar">
+      <input type="search" id="savedFilter" placeholder="在收藏里筛选…" i18n-ph="filter_saved">
+      <button class="btn" id="btnSync" i18n="sync_saved">同步收藏</button>
+      <span class="muted" id="savedCount"></span>
+    </div>
+    <div class="grid" id="savedGrid"></div>
+  </section>
+
+  <!-- ------------------------------------------------------------ search -->
+  <section class="panel" id="panel-search">
+    <div class="toolbar">
+      <input type="search" id="query" placeholder="书名、作者、ISBN…" i18n-ph="search_ph">
+      <select id="lang">
+        <option value="" i18n="any_lang">任意语言</option>
+        <option value="chinese">中文</option>
+        <option value="english">English</option>
+        <option value="japanese">日本語</option>
+        <option value="german">Deutsch</option>
+        <option value="french">Français</option>
+        <option value="russian">Русский</option>
+      </select>
+      <select id="format">
+        <option value="" i18n="any_format">任意格式</option>
+        <option value="epub">EPUB</option>
+        <option value="pdf">PDF</option>
+        <option value="mobi">MOBI</option>
+        <option value="azw3">AZW3</option>
+        <option value="fb2">FB2</option>
+        <option value="txt">TXT</option>
+      </select>
+      <button class="btn primary" id="btnSearch" i18n="btn_search">搜索</button>
+    </div>
+    <div class="grid" id="searchGrid">
+      <div class="empty" i18n="search_hint">输入书名或作者，开始搜索</div>
+    </div>
+    <div class="pager" id="searchPager"></div>
+  </section>
+
+  <!-- --------------------------------------------------------- downloads -->
+  <section class="panel" id="panel-downloads">
+    <div class="toolbar">
+      <button class="btn" id="btnResume" i18n="resume">继续队列</button>
+      <button class="btn ghost" id="btnPause" i18n="pause">暂停队列</button>
+      <span class="notice" id="queueNotice"></span>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th i18n="col_title">书名</th>
+          <th i18n="col_status">状态</th>
+          <th i18n="col_progress">进度</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="downloadsBody"></tbody>
+    </table>
+  </section>
+
+  <!-- ----------------------------------------------------------- library -->
+  <section class="panel" id="panel-library">
+    <div class="toolbar">
+      <span class="muted" id="libraryDir"></span>
+    </div>
+    <table class="table">
+      <thead>
+        <tr><th i18n="col_file">文件</th><th i18n="col_size">大小</th><th></th></tr>
+      </thead>
+      <tbody id="libraryBody"></tbody>
+    </table>
+  </section>
+
+  <!-- ---------------------------------------------------------- settings -->
+  <section class="panel" id="panel-settings">
+    <div class="card">
+      <h2 i18n="settings_account">账号</h2>
+      <p class="muted" i18n="settings_hint">
+        填写 Z-Library 镜像域名并登录。密码只在登录时使用一次，不会被保存；
+        保存下来的只有会话 Cookie。
+      </p>
+
+      <label i18n="label_domain">镜像域名</label>
+      <input type="text" id="domain" placeholder="e.g. example.com">
+
+      <label i18n="label_email">邮箱</label>
+      <input type="text" id="email" autocomplete="username">
+
+      <label i18n="label_password">密码</label>
+      <input type="password" id="password" autocomplete="current-password">
+
+      <details>
+        <summary i18n="advanced_cookie">或直接粘贴 Cookie</summary>
+        <label>remix_userid</label>
+        <input type="text" id="cookieUid">
+        <label>remix_userkey</label>
+        <input type="text" id="cookieKey">
+      </details>
+
+      <div class="row">
+        <button class="btn primary" id="btnLogin" i18n="btn_login">登录</button>
+        <button class="btn ghost" id="btnLogout" i18n="btn_logout">退出</button>
+      </div>
+      <p class="notice" id="loginNotice"></p>
+    </div>
+
+    <div class="card">
+      <h2 i18n="settings_about">关于</h2>
+      <p class="muted">
+        zlib-nas · <span id="version">1.0.0</span><br>
+        <span i18n="about_text">自用工具：把自己的 Z-Library 账号搬到 NAS 上，收藏同步、搜索、带额度守卫的下载队列。</span>
+      </p>
+      <a class="btn ghost" href="/api/export" i18n="export">导出数据 JSON</a>
+    </div>
+  </section>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="/app.js"></script>
+</body>
+</html>
