@@ -63,6 +63,10 @@ def normalize_book(raw: Dict[str, Any]) -> Dict[str, Any]:
         "filesize_text": raw.get("filesizeString") or "",
         "cover": raw.get("cover") or "",
         "description": raw.get("description") or "",
+        "pages": raw.get("pages") or "",
+        "isbn": raw.get("identifier") or "",
+        "saved": bool(raw.get("_isUserSavedBook")),
+        "date_download": raw.get("date_download") or "",
         "md5": raw.get("md5") or "",
         "sha256": raw.get("sha256") or "",
         "quality": raw.get("qualityScore") or "",
@@ -218,6 +222,19 @@ class ZlibClient:
         )
         return self._page(payload, limit)
 
+    def set_saved(self, book_id: int, saved: bool) -> None:
+        action = "save" if saved else "unsave"
+        payload = self._request("GET", f"/eapi/user/book/{book_id}/{action}")
+        if payload.get("success") != 1:
+            raise ZlibError("wishlist change was not confirmed")
+
+    def history(self, page: int = 1, limit: int = 20) -> Dict[str, Any]:
+        payload = self._request("GET", "/eapi/user/book/downloaded",
+                                params={"page": page, "limit": limit, "order": "newest"})
+        if not isinstance(payload.get("books"), list) or not isinstance(payload.get("pagination"), dict):
+            raise ZlibError("invalid history response")
+        return self._page(payload, limit)
+
     def recommended(self, page: int = 1, limit: int = 20) -> Dict[str, Any]:
         payload = self._request(
             "GET", "/eapi/user/book/recommended", params={"page": page, "limit": limit}
@@ -276,6 +293,20 @@ class ZlibClient:
     def book_info(self, book_id: int, book_hash: str) -> Dict[str, Any]:
         payload = self._request("GET", f"/eapi/book/{book_id}/{book_hash}")
         return normalize_book(payload.get("book") or {})
+
+    def similar(self, book_id: int, book_hash: str) -> List[Dict[str, Any]]:
+        """Books the mirror considers related to this one.
+
+        The endpoint ignores ``page``/``limit`` and always answers with the same
+        fixed set (about two dozen titles), so there is nothing to paginate.
+        """
+        payload = self._request("GET", f"/eapi/book/{book_id}/{book_hash}/similar")
+        books = []
+        for raw in payload.get("books") or []:
+            book = normalize_book(raw)
+            if book.get("id") and book.get("hash"):
+                books.append(book)
+        return books
 
     def file_link(self, book_id: int, book_hash: str) -> Dict[str, Any]:
         """Exchange a book for a time-limited download link.

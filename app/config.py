@@ -15,7 +15,8 @@ DATA_DIR = Path(_env("DATA_DIR", "/app/data"))
 DOWNLOAD_DIR = Path(_env("DOWNLOAD_DIR", "")) if _env("DOWNLOAD_DIR") else DATA_DIR / "downloads"
 MIRROR_DIR = Path(_env("MIRROR_DIR")) if _env("MIRROR_DIR") else None
 
-# Z-Library mirror domain, without scheme. e.g. "zh.pirate101.ru"
+# Z-Library mirror domain, without scheme. No default: swap in a site that is
+# reachable from your network, e.g. "your-mirror.example".
 ZLIB_DOMAIN = _env("ZLIB_DOMAIN")
 # Optional auto-login credentials. The password is used once and never stored;
 # only the resulting session cookie is persisted.

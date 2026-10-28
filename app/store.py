@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS downloads (
     title       TEXT    NOT NULL DEFAULT '',
     author      TEXT    NOT NULL DEFAULT '',
     extension   TEXT    NOT NULL DEFAULT '',
+    filesize    INTEGER NOT NULL DEFAULT 0,
     filename    TEXT    NOT NULL DEFAULT '',
     path        TEXT    NOT NULL DEFAULT '',
     status      TEXT    NOT NULL DEFAULT 'queued',
@@ -58,6 +59,17 @@ CREATE TABLE IF NOT EXISTS settings (
     key   TEXT PRIMARY KEY,
     value TEXT NOT NULL DEFAULT ''
 );
+
+-- Remote history omits the cover category segment, so the real cover URL has to
+-- be resolved through the book detail endpoint. Remembering the answer keeps
+-- that a once-per-book cost instead of one lookup per page render.
+CREATE TABLE IF NOT EXISTS book_covers (
+    zlib_id    INTEGER NOT NULL,
+    hash       TEXT    NOT NULL DEFAULT '',
+    cover      TEXT    NOT NULL DEFAULT '',
+    updated_at INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (zlib_id, hash)
+);
 """
 
 
@@ -71,6 +83,19 @@ class Store:
         self._lock = threading.Lock()
         with self._connect() as conn:
             conn.executescript(_SCHEMA)
+        self._migrate()
+
+    def _migrate(self) -> None:
+        """Add columns that older databases are missing (data-safe, idempotent).
+
+        ``CREATE TABLE IF NOT EXISTS`` never touches an existing table, so a
+        column added to ``_SCHEMA`` needs this companion step or every insert
+        against an upgraded install fails.
+        """
+        with self._lock, self._connect() as conn:
+            known = {row["name"] for row in conn.execute("PRAGMA table_info(downloads)")}
+            if "filesize" not in known:
+                conn.execute("ALTER TABLE downloads ADD COLUMN filesize INTEGER NOT NULL DEFAULT 0")
 
     def _connect(self) -> sqlite3.Connection:
         conn = sqlite3.connect(self.path, timeout=30)
@@ -158,6 +183,57 @@ class Store:
             ).fetchall()
         return {"books": [dict(row) for row in rows], "total": total}
 
+    def is_saved(self, book_id: int, book_hash: str) -> bool:
+        with self._lock, self._connect() as conn:
+            return conn.execute(
+                "SELECT 1 FROM saved_books WHERE zlib_id=? AND hash=?",
+                (book_id, book_hash),
+            ).fetchone() is not None
+
+    def remove_saved(self, book_id: int, book_hash: str) -> None:
+        with self._lock, self._connect() as conn:
+            conn.execute("DELETE FROM saved_books WHERE zlib_id=? AND hash=?", (book_id, book_hash))
+
+    def book_download_state(self, book_id: int, book_hash: str) -> Dict[str, bool]:
+        with self._lock, self._connect() as conn:
+            states = {row[0] for row in conn.execute(
+                "SELECT status FROM downloads WHERE zlib_id=? AND hash=?",
+                (book_id, book_hash),
+            )}
+        return {"downloaded": "done" in states,
+                "in_queue": bool(states & {"queued", "running", "paused"})}
+
+    def get_cover(self, book_id: int, book_hash: str) -> str:
+        with self._lock, self._connect() as conn:
+            row = conn.execute(
+                "SELECT cover FROM book_covers WHERE zlib_id=? AND hash=?",
+                (book_id, book_hash),
+            ).fetchone()
+        return row["cover"] if row else ""
+
+    def set_cover(self, book_id: int, book_hash: str, cover: str) -> None:
+        if not cover:
+            return
+        with self._lock, self._connect() as conn:
+            conn.execute(
+                "INSERT INTO book_covers (zlib_id, hash, cover, updated_at) VALUES (?, ?, ?, ?) "
+                "ON CONFLICT(zlib_id, hash) DO UPDATE SET cover=excluded.cover, updated_at=excluded.updated_at",
+                (book_id, book_hash, cover, _now()),
+            )
+
+    def clear_saved(self) -> int:
+        """Drop the mirrored wishlist and cached covers.
+
+        Both belong to the signed-in account, so they must not outlive the
+        session. Download records are deliberately kept: they describe what this
+        NAS already fetched, not what the account holds.
+        """
+        with self._lock, self._connect() as conn:
+            removed = conn.execute("SELECT COUNT(*) AS n FROM saved_books").fetchone()["n"]
+            conn.execute("DELETE FROM saved_books")
+            conn.execute("DELETE FROM book_covers")
+        return removed
+
     def saved_hashes(self) -> set:
         with self._lock, self._connect() as conn:
             rows = conn.execute("SELECT sha256 FROM saved_books WHERE sha256 != ''").fetchall()
@@ -173,14 +249,15 @@ class Store:
         stamp = _now()
         with self._lock, self._connect() as conn:
             cursor = conn.execute(
-                "INSERT INTO downloads(zlib_id, hash, title, author, extension, status, "
-                "created_at, updated_at) VALUES(?,?,?,?,?,?,?,?)",
+                "INSERT INTO downloads(zlib_id, hash, title, author, extension, filesize, "
+                "status, created_at, updated_at) VALUES(?,?,?,?,?,?,?,?,?)",
                 (
                     book.get("id"),
                     book.get("hash") or "",
                     book.get("title") or "",
                     book.get("author") or "",
                     book.get("extension") or "",
+                    int(book.get("filesize") or 0),
                     "queued",
                     stamp,
                     stamp,
@@ -237,16 +314,3 @@ class Store:
             ).fetchall()
         return {row["status"]: row["n"] for row in rows}
 
-    # ----------------------------------------------------------------- export
-
-    def dump_json(self, path) -> None:
-        with self._lock, self._connect() as conn:
-            payload = {
-                "saved_books": [dict(row) for row in conn.execute("SELECT * FROM saved_books")],
-                "downloads": [dict(row) for row in conn.execute("SELECT * FROM downloads")],
-                "settings": {
-                    row["key"]: row["value"] for row in conn.execute("SELECT * FROM settings")
-                },
-            }
-        with open(path, "w", encoding="utf-8") as handle:
-            json.dump(payload, handle, ensure_ascii=False, indent=2)

@@ -13,6 +13,7 @@ from __future__ import annotations
 import os
 import queue
 import re
+import shutil
 import threading
 import time
 from pathlib import Path
@@ -21,6 +22,10 @@ from typing import Any, Callable, Dict, Optional
 from . import config
 
 _UNSAFE = re.compile(r'[\\/:*?"<>|\x00-\x1f]')
+
+# Keep this much free on top of the expected file size. The mirror's reported
+# size is advisory, and the filesystem needs headroom of its own.
+_DISK_MARGIN = 50 * 1024 * 1024
 
 
 def safe_filename(title: str, author: str, extension: str) -> str:
@@ -162,6 +167,23 @@ class DownloadQueue:
             )
             counter += 1
 
+        # Refuse up front rather than fail halfway through on a full disk: a
+        # half-written file is worse than no file, and the allowance spent on
+        # the partial attempt is already gone. A tight margin covers the fact
+        # that the download's size is the mirror's claim, not a promise.
+        backup = self._free_bytes(destination.parent)
+        needed = int(record["filesize"] or 0)
+        if needed > 0 and backup < needed + _DISK_MARGIN:
+            self.store.update_download(
+                download_id,
+                status="failed",
+                error=(
+                    f"not enough disk space: {backup // (1024 * 1024)} MB free, "
+                    f"{needed // (1024 * 1024)} MB needed"
+                )[:500],
+            )
+            return
+
         self.store.update_download(
             download_id, status="running", filename=destination.name, path=str(destination), error=""
         )
@@ -194,6 +216,18 @@ class DownloadQueue:
         finally:
             with self._lock:
                 self._active.pop(download_id, None)
+
+    @staticmethod
+    def _free_bytes(path: Path) -> int:
+        """Free space on the filesystem holding ``path``; 0 when it is unknown.
+
+        Unknown free space must not block a download, so the quota gate above
+        stays the authority and this is only a best-effort pre-flight.
+        """
+        try:
+            return shutil.disk_usage(path).free
+        except OSError:
+            return 0
 
     def _mirror(self, path: Path) -> None:
         """Optionally expose the file in another folder (e.g. a library scan dir).

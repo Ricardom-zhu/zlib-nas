@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>zlib-nas · 登录</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/login.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+</head>
+<body class="auth-body">
+
+<main class="auth-card">
+  <div class="brand auth-brand">
+    <span class="logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+           stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19a1 1 0 0 1 1 1v13.5"/>
+        <path d="M4 4.5V19a2 2 0 0 0 2 2h14"/>
+        <path d="M8 7h8M8 11h6"/>
+      </svg>
+    </span>
+    <span>zlib-nas</span>
+  </div>
+
+  <h1 id="authTitle">设置访问密码</h1>
+  <p class="muted" id="authHint">这台机器上还没有账号。请设置一个密码，之后进入本页都需要它。</p>
+
+  <form id="authForm" autocomplete="off">
+    <label for="password" id="pwLabel">密码</label>
+    <input type="password" id="password" name="password" autocomplete="new-password" required>
+    <label for="confirm" id="confirmLabel">再输一次</label>
+    <input type="password" id="confirm" name="confirm" autocomplete="new-password">
+    <div class="row">
+      <button class="btn primary" type="submit" id="authSubmit">设置密码</button>
+    </div>
+    <p class="notice" id="authNotice"></p>
+  </form>
+</main>
+
+<script src="/login.js"></script>
+</body>
+</html>

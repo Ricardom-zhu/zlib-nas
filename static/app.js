@@ -2,6 +2,7 @@
 
 const I18N = {
   zh: {
+    tab_history: "远端历史", history_refresh: "刷新远端历史", history_hint: "来自账号的远端下载记录，不代表文件已保存在这台 NAS；日期按远端原样显示。", history_total: "远端共 {n} 条", remote_downloaded: "远端下载日期",
     tab_saved: "收藏", tab_search: "搜索", tab_downloads: "下载",
     tab_library: "本地库", tab_settings: "设置",
     filter_saved: "在收藏里筛选…", sync_saved: "同步收藏",
@@ -17,8 +18,14 @@ const I18N = {
     label_domain: "镜像域名", label_email: "邮箱", label_password: "密码",
     advanced_cookie: "或直接粘贴 Cookie",
     btn_login: "登录", btn_logout: "退出",
-    settings_about: "关于", export: "导出数据 JSON",
-    about_text: "自用工具：把自己的 Z-Library 账号搬到 NAS 上，收藏同步、搜索、带额度守卫的下载队列。",
+    settings_about: "关于",
+    local_auth_title: "本地账号", local_auth_hint: "本地账号，只存在这台 NAS 上；与本工具里的 Z-Library 账号是两回事。",
+    local_auth_username: "本地用户名",
+    local_auth_current: "当前密码", local_auth_new: "新密码（至少 8 位，留空则不改）",
+    local_auth_submit: "保存修改", local_auth_logout: "退出登录",
+    local_auth_saved: "已保存，其他设备需要重新登录。", local_auth_wrong: "当前密码不对",
+    local_auth_short: "新密码至少 8 位", local_auth_logged_out: "已退出，请重新登录。",
+    about_text: "由 Ricardo 与他的大肥鱼阿静一同开发。",
     empty: "这里还什么都没有",
     search_hint: "输入书名或作者，开始搜索",
     download: "下载", reload: "重试", prev: "上一页", next: "下一页",
@@ -27,9 +34,18 @@ const I18N = {
     logged_in: "已登录", login_ok: "登录成功",
     owned: "已下载", in_queue: "队列中", quota: "今日额度",
     downloaded: "已加入队列", synced: "已同步 {n} 本",
-    confirm_logout: "确定退出并清除本地会话？",
+    detail_title: "书籍详情", close: "关闭", detail_back: "返回",
+    loading: "加载中…", detail_error: "详情加载失败", unavailable: "缺少书籍 hash，详情、收藏和下载不可用。",
+    author: "作者", publisher: "出版社", year: "年份", language: "语言", format: "格式", pages: "页数",
+    description: "简介", no_description: "暂无简介", save: "加入收藏", unsave: "取消收藏", saving: "保存中…",
+    saved_ok: "已加入收藏", unsaved_ok: "已取消收藏", saved_refresh_error: "收藏已更新，但本地列表刷新失败，请重试刷新。",
+    author_search: "搜索作者", author_results: "作者名称搜索结果", collapse: "收起", expand: "展开",
+    similar: "相关推荐", similar_error: "相关推荐加载失败",
+    author_error: "作者搜索失败", download_error: "下载操作失败", save_error: "收藏操作失败",
+    confirm_logout: "确定退出并清除本地会话与本机收藏镜像？",
   },
   en: {
+    tab_history: "Remote history", history_refresh: "Refresh remote history", history_hint: "Account download history does not mean the files are on this NAS. Dates are shown as returned by the service.", history_total: "{n} remote records", remote_downloaded: "Remote download date",
     tab_saved: "Wishlist", tab_search: "Search", tab_downloads: "Downloads",
     tab_library: "Library", tab_settings: "Settings",
     filter_saved: "Filter wishlist…", sync_saved: "Sync wishlist",
@@ -45,8 +61,14 @@ const I18N = {
     label_domain: "Mirror domain", label_email: "Email", label_password: "Password",
     advanced_cookie: "Or paste cookies directly",
     btn_login: "Sign in", btn_logout: "Sign out",
-    settings_about: "About", export: "Export data as JSON",
-    about_text: "A personal tool: bring your Z-Library account to your NAS with wishlist sync, search and a quota-aware download queue.",
+    settings_about: "About",
+    local_auth_title: "Local account", local_auth_hint: "A local account stored only on this NAS — unrelated to the Z-Library account this tool uses.",
+    local_auth_username: "Local username",
+    local_auth_current: "Current password", local_auth_new: "New password (at least 8 characters, blank to keep)",
+    local_auth_submit: "Save changes", local_auth_logout: "Sign out",
+    local_auth_saved: "Saved — other devices must sign in again.", local_auth_wrong: "Current password is wrong",
+    local_auth_short: "New password must be at least 8 characters", local_auth_logged_out: "Signed out. Please sign in again.",
+    about_text: "Built by Ricardo and his 大肥鱼阿静.",
     empty: "Nothing here yet",
     search_hint: "Type a title or an author to start",
     download: "Download", reload: "Retry", prev: "Prev", next: "Next",
@@ -55,7 +77,15 @@ const I18N = {
     logged_in: "Signed in", login_ok: "Signed in",
     owned: "Owned", in_queue: "Queued", quota: "Today's quota",
     downloaded: "Queued", synced: "Synced {n} books",
-    confirm_logout: "Sign out and clear the local session?",
+    detail_title: "Book details", close: "Close", detail_back: "Back",
+    loading: "Loading…", detail_error: "Unable to load details", unavailable: "Book hash is missing. Details, wishlist and download are unavailable.",
+    author: "Author", publisher: "Publisher", year: "Year", language: "Language", format: "Format", pages: "Pages",
+    description: "Description", no_description: "No description available", save: "Add to wishlist", unsave: "Remove from wishlist", saving: "Saving…",
+    saved_ok: "Added to wishlist", unsaved_ok: "Removed from wishlist", saved_refresh_error: "Wishlist updated, but refreshing the local list failed. Please refresh again.",
+    author_search: "Search author", author_results: "Author name search results", collapse: "Hide", expand: "Show",
+    similar: "Recommendations", similar_error: "Could not load recommendations",
+    author_error: "Author search failed", download_error: "Download failed", save_error: "Wishlist update failed",
+    confirm_logout: "Sign out and clear the local session and wishlist mirror?",
   },
 };
 
@@ -134,6 +164,8 @@ function applyLanguage() {
   renderDownloads(state.lastDownloads || []);
   renderLibrary(state.lastLibrary || []);
   if (state.searchResult) renderSearch(state.searchResult);
+  renderHistory();
+  if ($("bookDialog").open) renderDetail();
 }
 
 /* -------------------------------------------------------------------- quota */
@@ -160,13 +192,31 @@ function renderQuota() {
 
 /* -------------------------------------------------------------------- books */
 
+function miniCard(book) {
+  // Shelf layout for the in-dialog lists: cover on top, two columns, so a long
+  // list of recommendations stays scannable on a phone.
+  const raw = book.cover || "";
+  const src = raw.startsWith("/api/") ? raw : /^https?:/i.test(raw) ? `/api/cover?u=${encodeURIComponent(raw)}` : "";
+  const cover = src
+    ? `<img class="mini-cover" loading="lazy" src="${esc(src)}" alt="">`
+    : `<div class="mini-cover placeholder">${BOOK_ICON}</div>`;
+  return `<button type="button" class="mini-book" data-detail="${esc(book.id)}" data-hash="${esc(book.hash)}" data-title="${esc(book.title)}">
+    ${cover}<span class="mini-title">${esc(book.title)}</span><span class="mini-author">${esc(book.author || "")}</span></button>`;
+}
+
 function bookCard(book) {
   // The mirror sometimes reports a relative placeholder path instead of a URL;
   // asking the proxy for it would only produce a 400 on every render.
-  const remote = /^https?:/i.test(book.cover || "");
-  const cover = remote
-    ? `<img class="cover" loading="lazy" src="/api/cover?u=${encodeURIComponent(book.cover)}" alt="">`
-    : `<div class="cover placeholder">${BOOK_ICON}</div>`;
+  // Remote-history rows instead come back pointing at our own proxy (the real
+  // cover URL needs a server-side lookup), so those are used as-is.
+  const raw = book.cover || "";
+  const local = raw.startsWith("/api/");
+  const remote = /^https?:/i.test(raw);
+  const cover = local
+    ? `<img class="cover" loading="lazy" src="${esc(raw)}" alt="">`
+    : remote
+      ? `<img class="cover" loading="lazy" src="/api/cover?u=${encodeURIComponent(raw)}" alt="">`
+      : `<div class="cover placeholder">${BOOK_ICON}</div>`;
   const known = state.owned.get(`${book.id}:${book.hash}`) || state.owned.get(book.sha256);
   const owned = known === "done";
   const queued = !!known && !owned;
@@ -175,9 +225,9 @@ function bookCard(book) {
 
   return `
     <div class="card-book">
-      ${cover}
+      <button type="button" class="book-cover-button" data-detail="${esc(book.id)}" data-hash="${esc(book.hash)}" data-title="${esc(book.title)}" aria-label="${esc(t("detail_title") + ': ' + book.title)}">${cover}</button>
       <div class="book-body">
-        <div class="book-title" title="${esc(book.title)}">${esc(book.title)}</div>
+        <button type="button" class="book-title book-title-button" data-detail="${esc(book.id)}" data-hash="${esc(book.hash)}" data-title="${esc(book.title)}" title="${esc(book.title)}">${esc(book.title)}</button>
         <div class="book-meta" title="${esc(book.author)}">${meta}</div>
         <div class="book-actions">
           <span class="badge">${esc(book.extension || "")}</span>
@@ -186,7 +236,7 @@ function bookCard(book) {
           <button class="btn small primary" data-download="${esc(book.id)}"
             data-hash="${esc(book.hash)}" data-title="${esc(book.title)}"
             data-author="${esc(book.author)}" data-ext="${esc(book.extension || "")}"
-            ${known ? "disabled" : ""}>${t("download")}</button>
+            ${known || !book.hash ? "disabled" : ""} title="${!book.hash ? esc(t("unavailable")) : ""}">${t("download")}</button>
         </div>
       </div>
     </div>`;
@@ -226,7 +276,7 @@ function updateOwnedBadges() {
       pending.remove();
     }
 
-    button.disabled = !!status;
+    button.disabled = !!status || !button.dataset.hash || downloadPending.has(key);
   });
 }
 
@@ -356,6 +406,7 @@ async function refreshDownloads() {
   state.owned = owned;
   renderDownloads(records);
   updateOwnedBadges();
+  updateDetailActions();
 }
 
 async function refreshLibrary() {
@@ -411,24 +462,330 @@ async function runSearch(page = 1) {
   }
 }
 
+const downloadPending = new Set();
+const savePending = new Set();
+const detail = { view: null, stack: [], sequence: 0, controller: null, opener: null, origin: null };
+const bookKey = (book) => `${book.id}:${book.hash}`;
+
 async function queueDownload(button) {
   const payload = {
-    id: Number(button.dataset.download),
-    hash: button.dataset.hash,
-    title: button.dataset.title,
-    author: button.dataset.author,
-    extension: button.dataset.ext,
+    id: Number(button.dataset.download), hash: button.dataset.hash,
+    title: button.dataset.title, author: button.dataset.author, extension: button.dataset.ext,
   };
+  const key = bookKey(payload);
+  if (!payload.hash) { toast(t("unavailable")); return; }
+  if (button.disabled || downloadPending.has(key)) return;
+  downloadPending.add(key);
   button.disabled = true;
+  updateDetailActions();
   try {
     await api("/api/download", { method: "POST", body: payload });
+    state.owned.set(key, "queued");
+    for (const view of [detail.view, ...detail.stack]) {
+      if (view && bookKey(view.book) === key && view.data) view.data.in_queue = true;
+    }
     toast(t("downloaded"));
-    await refreshDownloads();
+    try { await refreshDownloads(); } catch (error) { toast(error.message); }
   } catch (error) {
+    if (detail.view && bookKey(detail.view.book) === key) {
+      detail.view.notice = `${t("download_error")}: ${error.message}`;
+    }
     toast(error.message);
-    button.disabled = false;
+  } finally {
+    downloadPending.delete(key);
+    button.disabled = !!state.owned.get(key);
+    updateOwnedBadges();
+    updateDetailActions();
   }
 }
+
+function cancelDetailRequest() {
+  detail.sequence += 1;
+  if (detail.controller) detail.controller.abort();
+  detail.controller = null;
+}
+
+function openDetail(book, opener) {
+  const dialog = $("bookDialog");
+  if (!dialog.open) {
+    detail.opener = opener;
+    detail.origin = { id: String(book.id), hash: book.hash || "", panel: opener.closest(".panel")?.id };
+    detail.stack = [];
+    dialog.showModal();
+  } else if (detail.view) {
+    detail.stack.push(detail.view);
+  }
+  cancelDetailRequest();
+  detail.view = { book, data: null, loading: false, error: "", notice: "", authorResult: null, authorLoading: false, authorError: "" };
+  loadDetail();
+  $("detailClose").focus();
+}
+
+async function loadDetail() {
+  cancelDetailRequest();
+  const view = detail.view;
+  if (!view) return;
+  if (!view.book.hash) { renderDetail(); return; }
+  const sequence = detail.sequence;
+  const controller = detail.controller = new AbortController();
+  view.loading = true;
+  view.error = "";
+  renderDetail();
+  try {
+    const data = await api(`/api/book/${encodeURIComponent(view.book.id)}?hash=${encodeURIComponent(view.book.hash)}`, { signal: controller.signal });
+    if (sequence !== detail.sequence || !$("bookDialog").open) return;
+    if (!data || !data.book) throw new Error(t("detail_error"));
+    // Retain the exact ID/hash from the clicked card, never infer a missing hash.
+    view.book = { ...data.book, id: view.book.id, hash: view.book.hash };
+    view.data = data;
+  } catch (error) {
+    if (sequence !== detail.sequence) return;
+    view.error = error.message;
+  } finally {
+    if (sequence === detail.sequence && $("bookDialog").open) {
+      view.loading = false;
+      renderDetail();
+    }
+  }
+}
+
+function renderDetail() {
+  const view = detail.view;
+  if (!view) return;
+  const content = $("detailContent");
+  $("detailBack").hidden = !detail.stack.length;
+  content.setAttribute("aria-busy", String(view.loading));
+  if (!view.book.hash) {
+    content.innerHTML = `<p class="notice">${esc(t("unavailable"))}</p>`;
+    return;
+  }
+  if (view.loading) { content.innerHTML = `<p class="empty">${t("loading")}</p>`; return; }
+  if (view.error) {
+    content.innerHTML = `<p role="alert">${t("detail_error")}: ${esc(view.error)}</p><button class="btn" id="detailRetry">${t("reload")}</button>`;
+    $("detailRetry").onclick = loadDetail;
+    return;
+  }
+  if (!view.data) return;
+  const book = view.book;
+  const meta = [["author", book.author], ["publisher", book.publisher], ["year", book.year],
+    ["language", book.language], ["format", book.extension], ["col_size", book.filesize_text || bytes(book.filesize)],
+    ["pages", book.pages], ["ISBN", book.isbn]].filter(([, value]) => value !== undefined && value !== null && value !== "");
+  const cover = /^https?:/i.test(book.cover || "")
+    ? `<img class="detail-cover" src="/api/cover?u=${encodeURIComponent(book.cover)}" alt="">`
+    : `<div class="detail-cover placeholder">${BOOK_ICON}</div>`;
+  content.innerHTML = `<div class="detail-summary">${cover}<div class="detail-info"><h3>${esc(book.title)}</h3>
+    <dl class="detail-meta">${meta.map(([label, value]) => `<dt>${esc(t(label))}</dt><dd>${esc(value)}</dd>`).join("")}</dl></div></div>
+    <div class="detail-actions"><button class="btn primary" id="detailDownload" data-download="${esc(book.id)}" data-hash="${esc(book.hash)}"
+      data-title="${esc(book.title)}" data-author="${esc(book.author)}" data-ext="${esc(book.extension)}"></button>
+      <button class="btn" id="detailSave"></button></div><p class="notice" id="detailNotice" role="status"></p>
+    <h3>${t("description")}</h3><div class="detail-description" id="detailDescription"></div>
+    <div class="detail-tools">${book.author ? `<button class="btn" id="detailAuthorSearch"></button>` : ""}
+      <button class="btn" id="detailSimilar"></button></div>
+    <div id="detailAuthorResults" hidden></div>
+    <div id="detailSimilarResults" hidden></div>`;
+  // This is the sole rich-text source: the detail API's server-whitelisted HTML.
+  if (typeof book.description_html === "string" && book.description_html) {
+    $("detailDescription").innerHTML = book.description_html;
+  } else {
+    $("detailDescription").textContent = t("no_description");
+  }
+  $("detailSave").onclick = toggleDetailSaved;
+  if ($("detailAuthorSearch")) $("detailAuthorSearch").onclick = toggleAuthorResults;
+  if ($("detailSimilar")) $("detailSimilar").onclick = toggleSimilarResults;
+  updateDetailActions();
+  renderAuthorResults();
+  renderSimilar();
+}
+
+function updateDetailActions() {
+  const view = detail.view;
+  if (!$("bookDialog").open || !view?.data || !$("detailDownload")) return;
+  const key = bookKey(view.book);
+  const known = state.owned.get(key);
+  const record = (state.lastDownloads || []).find((item) => `${item.zlib_id}:${item.hash}` === key);
+  if (record) {
+    view.data.downloaded = record.status === "done";
+    view.data.in_queue = ["running", "queued", "paused"].includes(record.status);
+  }
+  const owned = known === "done" || view.data.downloaded;
+  const queued = !!known || view.data.in_queue;
+  const download = $("detailDownload");
+  download.textContent = t(owned ? "owned" : queued ? "in_queue" : downloadPending.has(key) ? "loading" : "download");
+  download.disabled = owned || queued || downloadPending.has(key);
+  const save = $("detailSave");
+  save.textContent = t(savePending.has(key) ? "saving" : view.data.saved ? "unsave" : "save");
+  save.disabled = savePending.has(key);
+  save.setAttribute("aria-pressed", String(!!view.data.saved));
+  $("detailNotice").textContent = view.notice;
+}
+
+async function toggleDetailSaved() {
+  const view = detail.view;
+  if (!view?.data || !view.book.hash) return;
+  const key = bookKey(view.book);
+  if (savePending.has(key)) return;
+  savePending.add(key);
+  view.notice = "";
+  updateDetailActions();
+  try {
+    const result = await api(`/api/book/${encodeURIComponent(view.book.id)}/saved`, {
+      method: "POST", body: { hash: view.book.hash, saved: !view.data.saved },
+    });
+    if (!result.ok || typeof result.saved !== "boolean") throw new Error(t("save_error"));
+    for (const item of [view, detail.view, ...detail.stack]) {
+      if (item?.data && bookKey(item.book) === key) item.data.saved = result.saved;
+    }
+    view.notice = t(result.saved ? "saved_ok" : "unsaved_ok");
+    try { await refreshSaved(); } catch (error) { view.notice = t("saved_refresh_error"); }
+  } catch (error) {
+    view.notice = `${t("save_error")}: ${error.message}`;
+  } finally {
+    savePending.delete(key);
+    updateDetailActions();
+  }
+}
+
+function toggleAuthorResults() {
+  const view = detail.view;
+  if (!view || view.authorLoading) return;
+  // The button is both the entry point and the collapse control: first click
+  // runs the search, later clicks fold the results away and back.
+  if (view.authorResult || view.authorError) {
+    view.authorOpen = !view.authorOpen;
+    renderAuthorResults();
+  } else {
+    searchDetailAuthor(1);
+  }
+}
+
+async function searchDetailAuthor(page) {
+  const view = detail.view;
+  if (!view?.book.author || view.authorLoading) return;
+  const sequence = detail.sequence;
+  view.authorLoading = true;
+  view.authorOpen = true;
+  view.authorError = "";
+  renderAuthorResults();
+  try {
+    const result = await api("/api/search", { method: "POST", signal: detail.controller?.signal,
+      body: { query: view.book.author, page, limit: 20, languages: null, extensions: null } });
+    if (sequence !== detail.sequence || detail.view !== view) return;
+    view.authorResult = result;
+  } catch (error) {
+    if (sequence === detail.sequence) view.authorError = error.message;
+  } finally {
+    view.authorLoading = false;
+    if (sequence === detail.sequence && detail.view === view) renderAuthorResults();
+  }
+}
+
+function renderAuthorResults() {
+  const view = detail.view;
+  const button = $("detailAuthorSearch");
+  if (!view || !button) return;
+  button.disabled = view.authorLoading;
+  // The label always names the section, so two collapsed buttons stacked on top
+  // of each other stay tellable apart.
+  button.textContent = view.authorLoading ? t("searching")
+    : view.authorError ? `${t("author_search")} · ${t("reload")}`
+    : view.authorResult ? `${t("author_search")} · ${t(view.authorOpen ? "collapse" : "expand")}`
+    : t("author_search");
+  const result = view.authorResult;
+  const target = $("detailAuthorResults");
+  if (!target) return;
+  const visible = view.authorOpen && (!!result || !!view.authorError);
+  button.setAttribute("aria-expanded", String(visible));
+  target.hidden = !visible;
+  target.innerHTML = view.authorError ? `<p role="alert">${t("author_error")}: ${esc(view.authorError)}</p>` : "";
+  if (!result) return;
+  target.insertAdjacentHTML("beforeend", `<div class="book-shelf">${result.books?.length ? result.books.map(miniCard).join("") : `<p class="empty">${t("empty")}</p>`}</div>
+    <div class="pager"><button class="btn" id="authorPrev">${t("prev")}</button><span>${esc(result.page || 1)} / ${esc(result.pages || 1)}</span><button class="btn" id="authorNext">${t("next")}</button></div>`);
+  $("authorPrev").disabled = view.authorLoading || (result.page || 1) <= 1;
+  $("authorNext").disabled = view.authorLoading || !result.has_next;
+  $("authorPrev").onclick = () => searchDetailAuthor((result.page || 1) - 1);
+  $("authorNext").onclick = () => searchDetailAuthor((result.page || 1) + 1);
+}
+
+function toggleSimilarResults() {
+  const view = detail.view;
+  if (!view || view.similarLoading) return;
+  if (view.similar || view.similarError) {
+    view.similarOpen = !view.similarOpen;
+    renderSimilar();
+  } else {
+    loadSimilar();
+  }
+}
+
+async function loadSimilar() {
+  const view = detail.view;
+  if (!view?.book.hash || view.similarLoading) return;
+  const sequence = detail.sequence;
+  view.similarLoading = true;
+  view.similarOpen = true;
+  view.similarError = "";
+  renderSimilar();
+  try {
+    const result = await api(`/api/book/${encodeURIComponent(view.book.id)}/similar?hash=${encodeURIComponent(view.book.hash)}`,
+      { signal: detail.controller?.signal });
+    if (sequence !== detail.sequence || detail.view !== view) return;
+    view.similar = result.books || [];
+  } catch (error) {
+    if (sequence === detail.sequence) view.similarError = error.message;
+  } finally {
+    view.similarLoading = false;
+    if (sequence === detail.sequence && detail.view === view) renderSimilar();
+  }
+}
+
+function renderSimilar() {
+  const view = detail.view;
+  const button = $("detailSimilar");
+  if (!view || !button) return;
+  button.disabled = view.similarLoading;
+  button.textContent = view.similarLoading ? t("searching")
+    : view.similarError ? `${t("similar")} · ${t("reload")}`
+    : view.similar ? `${t("similar")} · ${t(view.similarOpen ? "collapse" : "expand")}`
+    : t("similar");
+  const target = $("detailSimilarResults");
+  if (!target) return;
+  const visible = view.similarOpen && (!!view.similar || !!view.similarError);
+  button.setAttribute("aria-expanded", String(visible));
+  target.hidden = !visible;
+  target.innerHTML = view.similarError ? `<p role="alert">${t("similar_error")}: ${esc(view.similarError)}</p>` : "";
+  if (!view.similar) return;
+  target.insertAdjacentHTML("beforeend", view.similar.length
+    ? `<div class="book-shelf">${view.similar.map(miniCard).join("")}</div>`
+    : `<p class="empty">${t("empty")}</p>`);
+}
+
+let historyPage = 1, historyResult = null, historySequence = 0;
+function renderHistory() {
+  if (!historyResult) return;
+  $("historyCount").textContent = t("history_total").replace("{n}", historyResult.total);
+  $("historyGrid").innerHTML = historyResult.books.length ? historyResult.books.map(book =>
+    `<div><div class="history-date">${t("remote_downloaded")}: ${esc(book.date_download || "—")}</div>${bookCard(book)}</div>`).join("") : `<p class="empty">${t("empty")}</p>`;
+  $("historyPager").innerHTML = `<button class="btn" id="historyPrev" ${historyPage <= 1 ? "disabled" : ""}>${t("prev")}</button><span>${historyPage} / ${historyResult.pages}</span><button class="btn" id="historyNext" ${!historyResult.has_next ? "disabled" : ""}>${t("next")}</button>`;
+  $("historyPrev").onclick = () => loadHistory(historyPage - 1);
+  $("historyNext").onclick = () => loadHistory(historyPage + 1);
+}
+async function loadHistory(page = 1, fresh = false) {
+  const sequence = ++historySequence;
+  $("historyNotice").textContent = t("loading");
+  $("historyRefresh").disabled = true;
+  try {
+    const result = await api(`/api/history?page=${page}${fresh ? "&fresh=1" : ""}`);
+    if (sequence !== historySequence) return;
+    historyPage = page; historyResult = result;
+    result.books.forEach(book => {
+      if (book.downloaded) state.owned.set(bookKey(book), "done");
+      else if (book.in_queue) state.owned.set(bookKey(book), "queued");
+    });
+    renderHistory(); $("historyNotice").textContent = "";
+  } catch (error) { if (sequence === historySequence) $("historyNotice").textContent = error.message; }
+  finally { if (sequence === historySequence) $("historyRefresh").disabled = false; }
+}
+$("historyRefresh").onclick = () => loadHistory(historyPage, true);
 
 /* -------------------------------------------------------------------- wiring */
 
@@ -440,10 +797,17 @@ document.querySelectorAll(".tab").forEach((tab) => {
     $(`panel-${tab.dataset.tab}`).classList.add("active");
     if (tab.dataset.tab === "downloads") { refreshDownloads(); refreshStatus(); }
     if (tab.dataset.tab === "library") refreshLibrary();
+    if (tab.dataset.tab === "history") loadHistory(historyPage);
+    if (tab.dataset.tab === "settings") fillLocalAccount();
   };
 });
 
 document.addEventListener("click", (event) => {
+  const detailButton = event.target.closest("[data-detail]");
+  if (detailButton) {
+    openDetail({ id: detailButton.dataset.detail, hash: detailButton.dataset.hash, title: detailButton.dataset.title }, detailButton);
+    return;
+  }
   const downloadButton = event.target.closest("[data-download]");
   if (downloadButton) { queueDownload(downloadButton); return; }
   const retryButton = event.target.closest("[data-retry]");
@@ -452,6 +816,37 @@ document.addEventListener("click", (event) => {
       .then(refreshDownloads)
       .catch((error) => toast(error.message));
   }
+});
+
+$("detailClose").onclick = () => $("bookDialog").close();
+$("detailBack").onclick = () => {
+  if (!detail.stack.length) return;
+  cancelDetailRequest();
+  detail.view = detail.stack.pop();
+  detail.view.authorLoading = false;
+  if (detail.view.loading || !detail.view.data) loadDetail();
+  else renderDetail();
+  $("detailClose").focus();
+};
+let backdropPressed = false;
+function outsideDialog(event) {
+  const rect = $("bookDialog").getBoundingClientRect();
+  return event.target === $("bookDialog") && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom);
+}
+$("bookDialog").addEventListener("pointerdown", (event) => { backdropPressed = outsideDialog(event); });
+$("bookDialog").addEventListener("click", (event) => {
+  if (backdropPressed && outsideDialog(event)) $("bookDialog").close();
+  backdropPressed = false;
+});
+$("bookDialog").addEventListener("close", () => {
+  cancelDetailRequest();
+  const origin = detail.origin;
+  const replacement = [...document.querySelectorAll("[data-detail]")].find((node) =>
+    !node.closest("dialog") && node.dataset.detail === origin?.id && node.dataset.hash === origin?.hash);
+  const target = detail.opener?.isConnected ? detail.opener : replacement || document.querySelector(`.tab[data-tab="${origin?.panel?.replace("panel-", "") || "saved"}"]`);
+  target?.focus();
+  detail.view = null;
+  detail.stack = [];
 });
 
 $("btnRefresh").onclick = () => {
@@ -502,10 +897,71 @@ $("btnLogin").onclick = async () => {
   }
 };
 
+// ---------------------------------------------------------------- local auth
+$("localPasswordForm").onsubmit = async (event) => {
+  event.preventDefault();
+  const notice = $("localAuthNotice");
+  const current = $("localCurrent").value;
+  // Blank means "keep the current password" so the username alone can be edited.
+  const next = $("localNew").value || current;
+  const username = $("localUsername").value.trim();
+  notice.className = "notice";
+  if (next.length < 8) {
+    notice.textContent = t("local_auth_short");
+    notice.classList.add("err");
+    return;
+  }
+  try {
+    const response = await fetch("/api/local/password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ current, password: next, username }),
+    });
+    if (response.status === 401) {
+      notice.textContent = t("local_auth_wrong");
+      notice.classList.add("err");
+      return;
+    }
+    if (!response.ok) throw new Error((await response.json()).detail || "failed");
+    notice.textContent = t("local_auth_saved");
+    notice.classList.add("ok");
+    $("localCurrent").value = "";
+    $("localNew").value = "";
+  } catch (error) {
+    notice.textContent = error.message;
+    notice.classList.add("err");
+  }
+};
+
+async function fillLocalAccount() {
+  try {
+    const status = await (await fetch("/api/local/status")).json();
+    if (status.username) $("localUsername").value = status.username;
+  } catch (_) {
+    /* the field stays as-is; it is only a label */
+  }
+}
+
+$("btnLocalLogout").onclick = async () => {
+  try {
+    await fetch("/api/local/logout", { method: "POST" });
+  } catch (_) {
+    /* fall through to the redirect: the cookie is dropped server-side anyway */
+  }
+  window.location.replace("/login");
+};
+
 $("btnLogout").onclick = async () => {
   if (!confirm(t("confirm_logout"))) return;
-  try { await api("/api/logout", { method: "POST" }); await refreshStatus(); }
-  catch (error) { toast(error.message); }
+  try {
+    await api("/api/logout", { method: "POST" });
+    // The server drops its wishlist mirror on logout, so the page must not keep
+    // showing the previous account's books either.
+    state.savedBooks = [];
+    renderSaved();
+    if ($("bookDialog").open) $("bookDialog").close();
+    await refreshStatus();
+  } catch (error) { toast(error.message); }
 };
 
 /* --------------------------------------------------------------------- boot */
@@ -521,6 +977,6 @@ $("btnLogout").onclick = async () => {
     // mirror once the server-side cache has expired.
     if (document.hidden) return;
     refreshStatus();
-    if ($("panel-downloads").classList.contains("active")) refreshDownloads();
+    if ($("panel-downloads").classList.contains("active") || $("bookDialog").open) refreshDownloads().catch(() => {});
   }, 30000);
 })();

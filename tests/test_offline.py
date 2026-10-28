@@ -338,6 +338,29 @@ def main() -> int:
     check("queue reports reason", queue.state()["paused"] is True, queue.state())
     USER["downloads_today"] = 3
 
+    # Re-open the gate first: the previous check left the queue paused on quota,
+    # which would short-circuit before the disk test ever runs.
+    queue.resume()
+    USER["downloads_today"] = 0
+    print("queue: refuses to start on a full disk")
+    # A half-written download wastes an allowance slot and leaves debris, so the
+    # size check has to come before the mirror is touched at all.
+    huge = store.create_download(
+        {"id": 1003, "hash": "ccc333", "title": "需要整个磁盘的书", "author": "某人",
+         "extension": "pdf", "filesize": 500 * 1024 ** 3}
+    )
+    # The gate sits before any network call, so no /file request may appear.
+    file_requests = [r for r in REQUEST_LOG if "/file" in str(r[1])]
+    queue._process(huge)
+    huge_record = store.get_download(huge)
+    check("disk gate marks it failed", huge_record["status"] == "failed", huge_record["status"])
+    check("disk gate explains why", "disk space" in huge_record["error"], huge_record["error"])
+    check(
+        "disk gate never called the mirror",
+        [r for r in REQUEST_LOG if "/file" in str(r[1])] == file_requests,
+        REQUEST_LOG[-1:],
+    )
+
     print("queue: resume clears the pause")
     queue.resume()
     state = queue.state()
@@ -354,12 +377,9 @@ def main() -> int:
     else:
         check("html body raises a readable error", False, "no error")
 
-    print("export")
-    export_path = TMP / "export.json"
-    store.dump_json(export_path)
-    payload = json.loads(export_path.read_text(encoding="utf-8"))
-    check("export has books", len(payload["saved_books"]) == 2, payload.keys())
-    check("export has downloads", len(payload["downloads"]) >= 1)
+    print("stats")
+    counts = store.stats()
+    check("stats counts the finished download", counts.get("done", 0) >= 1, counts)
 
     server.shutdown()
     print()

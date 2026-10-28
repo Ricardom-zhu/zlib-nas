@@ -16,4 +16,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Run the offline suite (mock mirror, no network)
-        run: python tests/test_offline.py
+        run: |
+          python tests/test_offline.py
+          python tests/test_details.py
+          python tests/test_auth.py

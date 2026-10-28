@@ -37,6 +37,7 @@
 <nav class="tabs">
   <button class="tab active" data-tab="saved" i18n="tab_saved">收藏</button>
   <button class="tab" data-tab="search" i18n="tab_search">搜索</button>
+  <button class="tab" data-tab="history" i18n="tab_history">远端历史</button>
   <button class="tab" data-tab="downloads" i18n="tab_downloads">下载</button>
   <button class="tab" data-tab="library" i18n="tab_library">本地库</button>
   <button class="tab" data-tab="settings" i18n="tab_settings">设置</button>
@@ -82,6 +83,13 @@
       <div class="empty" i18n="search_hint">输入书名或作者，开始搜索</div>
     </div>
     <div class="pager" id="searchPager"></div>
+  </section>
+
+  <section class="panel" id="panel-history">
+    <div class="toolbar"><button class="btn" id="historyRefresh" i18n="history_refresh">刷新远端历史</button><span id="historyCount" class="muted"></span></div>
+    <p class="muted" i18n="history_hint">来自账号的远端下载记录，不代表文件已保存在这台 NAS；日期按远端原样显示。</p>
+    <p id="historyNotice" role="status"></p>
+    <div id="historyGrid" class="grid"></div><div id="historyPager" class="pager"></div>
   </section>
 
   <!-- --------------------------------------------------------- downloads -->
@@ -151,16 +159,42 @@
     </div>
 
     <div class="card">
+      <h2 i18n="local_auth_title">本地账号</h2>
+      <p class="muted" i18n="local_auth_hint">本地账号，只存在这台 NAS 上；与本工具里的 Z-Library 账号是两回事。</p>
+      <form id="localPasswordForm" autocomplete="off">
+        <label i18n="local_auth_username">本地用户名</label>
+        <input type="text" id="localUsername" autocomplete="username">
+        <label i18n="local_auth_current">当前密码</label>
+        <input type="password" id="localCurrent" autocomplete="current-password">
+        <label i18n="local_auth_new">新密码（至少 8 位，留空则不改）</label>
+        <input type="password" id="localNew" autocomplete="new-password">
+        <div class="row">
+          <button class="btn" type="submit" i18n="local_auth_submit">保存修改</button>
+          <button class="btn ghost" type="button" id="btnLocalLogout" i18n="local_auth_logout">退出登录</button>
+        </div>
+      </form>
+      <p class="notice" id="localAuthNotice"></p>
+    </div>
+
+    <div class="card">
       <h2 i18n="settings_about">关于</h2>
       <p class="muted">
         zlib-nas · <span id="version">1.0.0</span><br>
-        <span i18n="about_text">自用工具：把自己的 Z-Library 账号搬到 NAS 上，收藏同步、搜索、带额度守卫的下载队列。</span>
+        <span i18n="about_text">由 Ricardo 与他的大肥鱼阿静一同开发。</span>
       </p>
-      <a class="btn ghost" href="/api/export" i18n="export">导出数据 JSON</a>
     </div>
   </section>
 
 </main>
+
+<dialog id="bookDialog" class="book-dialog" aria-labelledby="detailHeading">
+  <div class="detail-toolbar">
+    <button type="button" class="btn ghost" id="detailBack" i18n="detail_back" hidden>返回</button>
+    <h2 id="detailHeading" i18n="detail_title">书籍详情</h2>
+    <button type="button" class="btn ghost" id="detailClose" i18n="close" autofocus>关闭</button>
+  </div>
+  <div id="detailContent" aria-live="polite"></div>
+</dialog>
 
 <div class="toast" id="toast"></div>
 
