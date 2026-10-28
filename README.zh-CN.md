@@ -1,6 +1,6 @@
 # zlib-nas
 
-[English](README.md) · **中文**
+[英文](README.md) · **中文**
 
 一个跑在 NAS 上的、给自己用的 **Z-Library 账号网页客户端**。
 
@@ -50,7 +50,7 @@ zlib-nas 只做这一件事：
 ## 快速开始
 
 ```bash
-git clone https://github.com/<你的名字>/zlib-nas.git
+git clone https://github.com/Ricardom-zhu/zlib-nas.git
 cd zlib-nas
 cp .env.example .env          # 可选：预先填好镜像域名
 docker compose up -d --build
@@ -62,7 +62,7 @@ docker compose up -d --build
 **设置** → 填一个**在你的网络下能打开的站点**域名（如 `your-mirror.example`，不要带 `https://`）
 → 登录 → 点 **同步收藏**。本项目不内置、也不推荐任何镜像站。
 
-访问密码只保护本页面，和 Z-Library 账号无关；忘了密码就执行
+访问密码仅保护本页面，与 Z-Library 账号无关；忘了密码就执行
 `docker compose exec web python -c "from app.store import Store; s = Store(); s.set_setting('local_password',''); s.set_setting('local_sessions','{}')"`
 ，下次打开会重新引导设密码。
 
