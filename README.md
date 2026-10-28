@@ -55,7 +55,7 @@ zlib-nas does exactly that, and only that:
 ## Quick start
 
 ```bash
-git clone https://github.com/<you>/zlib-nas.git
+git clone https://github.com/Ricardom-zhu/zlib-nas.git
 cd zlib-nas
 cp .env.example .env          # optional: preset the mirror domain
 docker compose up -d --build
